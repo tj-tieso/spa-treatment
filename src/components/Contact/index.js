@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { validateEmail } from "../../utils/helpers";
 
 function ContactForm() {
   // use Hook to initialize the values of the state
@@ -10,11 +11,34 @@ function ContactForm() {
   //destructure the formState object into its named properties
   const { name, email, message } = formState;
 
+  const [errorMessage, setErrorMessage] = useState("");
+
   function handleChange(e) {
+    // validation
+    if (e.target.name === "email") {
+      const isValid = validateEmail(e.target.value);
+      console.log(isValid);
+      // isValid conditional statement
+      if (!isValid) {
+        setErrorMessage("Your email is invalid.");
+      } else {
+        setErrorMessage("");
+      }
+    } else {
+      if (!e.target.value.length) {
+        setErrorMessage(`${e.target.name} is required.`);
+      } else {
+        setErrorMessage("");
+      }
+    }
+
     // use setFormState() to update the formState value
     // The name property of target refers to the name attribute of the form element.
     // Without the spread operator formState object would be overwritten to only contain the name: value key pair
-    setFormState({ ...formState, [e.target.name]: e.target.value });
+    if (!errorMessage) {
+      // state only updates if the form data has passed the quality tests
+      setFormState({ ...formState, [e.target.name]: e.target.value });
+    }
   }
 
   function handleSubmit(e) {
@@ -32,7 +56,7 @@ function ContactForm() {
           <input
             type="text"
             name="name"
-            onChange={handleChange}
+            onBlur={handleChange}
             defaultValue={name}
           />
         </div>
@@ -42,7 +66,7 @@ function ContactForm() {
           <input
             type="email"
             name="email"
-            onChange={handleChange}
+            onBlur={handleChange}
             defaultValue={email}
           />
         </div>
@@ -50,11 +74,16 @@ function ContactForm() {
           <label htmlFor="message">Message:</label>
           <textarea
             name="message"
-            onChange={handleChange}
+            onBlur={handleChange}
             defaultValue={message}
             rows="5"
           />
         </div>
+        {errorMessage && (
+          <div>
+            <p className="error-text">{errorMessage}</p>
+          </div>
+        )}
         <button type="submit">Submit</button>
       </form>
     </section>
